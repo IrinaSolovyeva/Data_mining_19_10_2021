@@ -1,0 +1,14 @@
+[
+    {
+        "email": "irasolo.art@gmail.com",
+        "primary": true,
+        "verified": true,
+        "visibility": "public"
+    },
+    {
+        "email": "72767181+IrinaSolovyeva@users.noreply.github.com",
+        "primary": false,
+        "verified": true,
+        "visibility": null
+    }
+]
