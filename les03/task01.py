@@ -10,9 +10,11 @@ import requests
 import pandas as pd
 from pprint import pprint
 from pymongo import MongoClient
+from pymongo.errors import *
+import re
 
 client = MongoClient('127.0.0.1', 27017)
-db = client['hh_vacancies_2']
+db = client['hh_vacancies']
 
 db_vacancies = db.db_vacancies
 
@@ -43,7 +45,7 @@ while True:
         info = vacancy.find('a', {'data-qa': 'vacancy-serp__vacancy-title'})
         name = info.text
         link = info.get('href')
-
+        vacancy_id = re.search(r'\d+', link).group(0)
         salary_info = vacancy.find('span', {'data-qa': 'vacancy-serp__vacancy-compensation'})
 
         if salary_info:
@@ -65,6 +67,7 @@ while True:
             salary_max = None
             salary_currency = None
 
+        vacancy_data['_id'] = vacancy_id
         vacancy_data['name'] = name
         vacancy_data['link'] = link
         vacancy_data['salary_min'] = salary_min
@@ -72,19 +75,21 @@ while True:
         vacancy_data['salary_currency'] = salary_currency
         vacancies_list.append(vacancy_data)
 
-        db_vacancies.insert_one(vacancy_data)
+        try:
+            db_vacancies.insert_one(vacancy_data)
+        except DuplicateKeyError:
+            pass
 
     params['page'] += 1
 
-df = pd.DataFrame(vacancies_list)
-df.to_csv("hh.csv", sep=";", index=False)
+# df = pd.DataFrame(vacancies_list)
+# df.to_csv("hh.csv", sep=";", index=False)
 
 user_salary = float(input('Введите интересующую заработную плату: '))
 
 def print_salary(my_salary):
     objects = db_vacancies.find({'$or': [{'salary_min': {'$gt': my_salary}}, {'salary_max': {'$gt': my_salary}}]})
-    print('Вакансий, с интересующей зароботной платой: ', objects.count())
-    for obj in objects:
+    for obj in enumerate(objects):
         pprint(obj)
 
 print_salary(user_salary)
