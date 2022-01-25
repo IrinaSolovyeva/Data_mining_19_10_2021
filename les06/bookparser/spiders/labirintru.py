@@ -33,6 +33,7 @@ class LabirintruSpider(scrapy.Spider):
         name = response.xpath("//h1/text()").get()
         author = response.xpath("//a[@data-event-label='author']/text()").get()
         price = response.xpath("//span[@class='buying-price-val-number']/text()").get()
+        discount_price = response.xpath("//span[@class='buying-pricenew-val-number']/text()").get()
         rating = response.xpath("//div[@id='rate']/text()").get()
 
-        yield BookparserItem(url=url, name=name, author=author, price=price, rating=rating)
+        yield BookparserItem(url=url, name=name, author=author, price=price, discount_price=discount_price, rating=rating)
